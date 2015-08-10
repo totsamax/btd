@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-var app = angular.module('app', ['ionic']);
+var app = angular.module('app', ['ionic','leaflet-directive']);
 
 app.run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -39,9 +39,10 @@ app.config(function($stateProvider, $urlRouterProvider) {
       templateUrl: 'page2.html'
     })
     
-    .state('page3', {
-      url: '/tabs',
-      templateUrl: 'page3.html'
+    .state('map', {
+      url: '/map',
+      templateUrl: 'templates/map.html',
+      controller: 'MapCtrl'
     })
     
     .state('side-menu1', {
@@ -52,8 +53,42 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
   // if none of the above states are matched, use this as the fallback
   
-  $urlRouterProvider.otherwise('/login');
+  $urlRouterProvider.otherwise('/map');
   
 
 });
+app.controller("MapCtrl",['$scope', "$log", "leafletData", function($scope, $log, leafletData){
+
+ angular.extend($scope, {
+                london: {
+                    lat: 51.505,
+                    lng: -0.09,
+                    zoom: 4
+                }
+            });
+
+            $scope.fitBounds = function() {
+                leafletData.getMap().then(function(map) {
+                    map.fitBounds([ [40.712, -74.227], [40.774, -74.125] ]);
+                });
+            };
+
+
+    leafletData.getMap().then(function(map) {
+      $log.info(map);
+ navigator.geolocation.getCurrentPosition(function(position) {
+      
+       L.Routing.control({
+              waypoints: [
+                L.latLng(position.coords.latitude,position.coords.longitude),
+                L.latLng(57.6792, 11.949)
+              ]
+            }).addTo(map);
+    });
+        
+    });
+
+            
+
+}]);
 
